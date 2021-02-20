@@ -1,0 +1,14 @@
+[Unit]
+Description=uWSGI instance to serve myproject
+After=network.target
+
+[Service]
+User=root
+Group=root
+
+WorkingDirectory=/home/dll/sola
+Environment="PATH=/home/denv/bin"
+ExecStart=/home/denv/bin/uwsgi --ini /home/dll/sola/deploy/solajapan.xyz-api.ini
+
+[Install]
+WantedBy=multi-user.target

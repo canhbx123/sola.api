@@ -1,0 +1,10 @@
+flask
+mysqlclient
+pymongo
+elasticsearch
+flask_cors
+flask_classful
+flask_caching
+dateparser
+ujson
+redis

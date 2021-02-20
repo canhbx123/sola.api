@@ -1,0 +1,116 @@
+[
+  {
+    "title": "Dashboard",
+    "icon": "b-icon-graph-up",
+    "path": "/",
+    "name": "home",
+    "roles": [
+      "admin",
+      "manager",
+      "leader",
+      "worker"
+    ],
+    "show_sub": true
+  },
+  {
+    "title": "仕事",
+    "icon": "b-icon-hammer",
+    "path": "/jobs",
+    "name": "jobs",
+    "roles": [
+      "admin",
+      "manager",
+      "leader",
+      "worker"
+    ],
+    "show_sub": false
+  },
+  {
+    "title": "作業過程",
+    "icon": "b-icon-hourglass-top",
+    "path": "/working-process",
+    "name": "working_process",
+    "roles": [
+      "admin",
+      "manager",
+      "leader",
+      "worker"
+    ],
+    "show_sub": false
+  },
+  {
+    "title": "ユーティリティ",
+    "roles": [
+      "admin",
+      "manager",
+      "leader",
+      "worker"
+    ],
+    "icon": "b-icon-gear-fill",
+    "show_sub": true,
+    "subs": [
+      {
+        "title": "部門",
+        "icon": "b-icon-journal-text",
+        "path": "/department",
+        "name": "department",
+        "roles": [
+          "admin",
+          "manager",
+          "leader",
+          "worker"
+        ],
+        "show_sub": false
+      },
+      {
+        "title": "ユーザー",
+        "icon": "b-icon-person-fill",
+        "path": "/user/manager",
+        "name": "user_manager",
+        "roles": [
+          "admin",
+          "manager",
+          "leader",
+          "worker"
+        ],
+        "show_sub": false
+      },
+      {
+        "title": "会社",
+        "icon": "b-icon-building",
+        "path": "/company/manager",
+        "name": "company_manager",
+        "roles": [
+          "admin",
+          "manager",
+          "leader"
+        ],
+        "show_sub": false
+      },
+      {
+        "title": "関係",
+        "icon": "b-icon-building",
+        "path": "/relationship",
+        "name": "relationship_manager",
+        "roles": [
+          "admin",
+          "manager",
+          "leader"
+        ],
+        "show_sub": false
+      },
+      {
+        "title": "ロケーション",
+        "icon": "b-icon-geo-alt-fill",
+        "path": "/location/manager",
+        "name": "location_manager",
+        "roles": [
+          "admin",
+          "manager",
+          "leader"
+        ],
+        "show_sub": false
+      }
+    ]
+  }
+]
