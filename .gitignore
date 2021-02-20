@@ -1,0 +1,6 @@
+sola.py
+spider.py
+.idea
+*.pyc
+*.log
+__pycache__/
