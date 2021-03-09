@@ -8,7 +8,7 @@ from common.authentication import login_required_json, api_secret
 from setting import SMY
 
 
-class DepartmentView(FlaskView):
+class DependentView(FlaskView):
 
     @route('/list', methods=['POST'])
     @decorators.return_json
@@ -29,14 +29,10 @@ class DepartmentView(FlaskView):
             criterias.append('AND locked=0')
         elif tab == 'lock':
             criterias.append('AND locked=1')
-        return SqlGrid(conn=SMY(), query='SELECT *', fromdb='FROM EM_department', criterias=criterias, params=params).render()
-
-    @route('/all', methods=['GET'])
-    @decorators.return_json
-    @login_required_json()
-    @api_secret
-    def all(self, log=None):
-        return SMY().query_table('SELECT * FROM EM_department WHERE locked=0')
+        if filters.get('is_dependent'):
+            criterias.append('AND is_dependent=1')
+        return SqlGrid(conn=SMY(), query='SELECT D.*,(SELECT name FROM EM_relationship WHERE id=D.relationship_id) as relationship', fromdb='FROM EM_dependent D', criterias=criterias,
+                       params=params).render()
 
     @route('/insert', methods=['POST'])
     @decorators.return_json
@@ -44,17 +40,25 @@ class DepartmentView(FlaskView):
     @api_secret
     def insert(self, log=None):
         name = request.json.get('name')
-        description = request.json.get('description')
+        furigana = request.json.get('furigana')
+        is_dependent = request.json.get('is_dependent')
+        relationship_id = request.json.get('relationship_id')
+        birthday = request.json.get('birthday')
+        employee_id = request.json.get('employee_id')
         data = {
             'name': name,
+            'furigana': furigana,
+            'employee_id': employee_id,
+            'relationship_id': relationship_id,
+            'birthday': birthday,
+            'is_dependent': is_dependent,
             'locked': 0,
-            'description': description,
             'modified': datetime.now(),
             'user_modified': log['id'],
             'created_time': datetime.now(),
             'created_user': log['id']
         }
-        rs = SMY().insert(table='EM_department', data=data)
+        rs = SMY().insert(table='EM_dependent', data=data)
         if rs:
             return {'err': 0}
         return {'err': 1}
@@ -70,7 +74,7 @@ class DepartmentView(FlaskView):
             'modified': datetime.now(),
             'user_modified': log['id']
         }
-        rs = SMY().update(table='EM_department', data=data, where={'id': department_id})
+        rs = SMY().update(table='EM_dependent', data=data, where={'id': department_id})
         if rs:
             return {'err': 0}
         return {'err': 1}
@@ -79,16 +83,26 @@ class DepartmentView(FlaskView):
     @decorators.return_json
     @login_required_json(roles=['admin'])
     @api_secret
-    def update(self):
+    def update(self, log=None):
         name = request.json.get('name')
-        description = request.json.get('description')
-        department_id = request.json.get('id')
+        furigana = request.json.get('furigana')
+        is_dependent = request.json.get('is_dependent')
+        relationship_id = request.json.get('relationship_id')
+        birthday = request.json.get('birthday')
+        employee_id = request.json.get('employee_id')
+        object_id = request.json.get('id')
         data = {
             'name': name,
-            'description': description,
-            'modified': datetime.now()
+            'furigana': furigana,
+            'employee_id': employee_id,
+            'relationship_id': relationship_id,
+            'birthday': birthday,
+            'is_dependent': is_dependent,
+            'locked': 0,
+            'modified': datetime.now(),
+            'user_modified': log['id'],
         }
-        rs = SMY().update(table='EM_department', data=data, where={'id': department_id})
+        rs = SMY().update(table='EM_dependent', data=data, where={'id': object_id})
         if rs:
             return {'err': 0}
         return {'err': 1}
@@ -103,7 +117,7 @@ class DepartmentView(FlaskView):
             'locked': 0,
             'modified': datetime.now()
         }
-        rs = SMY().update(table='EM_department', data=data, where={'id': department_id})
+        rs = SMY().update(table='EM_dependent', data=data, where={'id': department_id})
         if rs:
             return {'err': 0}
         return {'err': 1}

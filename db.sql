@@ -16,10 +16,8 @@ CREATE TABLE EM_company
     phone_number          VARCHAR(20),
     fax_number            VARCHAR(20),
     coords                VARCHAR(128),
-    memo1                 VARCHAR(256),
-    memo2                 VARCHAR(256),
-    memo3                 VARCHAR(256),
-    locked                TINYINT(1)   NOT NULL,
+    accept_range          FLOAT                 DEFAULT 0.2,
+    locked                TINYINT(1)   NOT NULL DEFAULT 0,
     modified              TIMESTAMP,
     user_modified         INT,
     created_user          INT,
@@ -28,18 +26,51 @@ CREATE TABLE EM_company
 CREATE INDEX EM_company_index1 ON EM_company (name);
 CREATE INDEX EM_company_index2 ON EM_company (locked);
 
+DROP TABLE IF EXISTS EM_company_attachment;
+CREATE TABLE EM_company_attachment
+(
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(256) NOT NULL,
+    path          VARCHAR(256) NOT NULL,
+    priority      INT          NOT NULL DEFAULT 0,
+    locked        TINYINT(1)   NOT NULL DEFAULT 0,
+    modified      TIMESTAMP,
+    user_modified INT,
+    created_user  INT,
+    created_time  TIMESTAMP
+);
 
+DROP TABLE IF EXISTS EM_department;
 CREATE TABLE EM_department
 (
-    id          INT AUTO_INCREMENT PRIMARY KEY,
-    name        VARCHAR(256) NOT NULL,
-    locked      tinyINT(1)   NOT NULL,
-    description VARCHAR(512),
-    modified    timestamp    NOT NULL
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(256) NOT NULL,
+    description   VARCHAR(512),
+    priority      INT                   DEFAULT 0,
+    locked        TINYINT(1)   NOT NULL DEFAULT 0,
+    modified      TIMESTAMP,
+    user_modified INT,
+    created_user  INT,
+    created_time  TIMESTAMP
 );
 CREATE INDEX EM_department_index1 ON EM_department (name);
 CREATE INDEX EM_department_index2 ON EM_department (locked);
 
+DROP TABLE IF EXISTS EM_jobtitle;
+CREATE TABLE EM_jobtitle
+(
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(256) NOT NULL,
+    description   VARCHAR(512),
+    priority      INT                   DEFAULT 0,
+    locked        TINYINT(1)   NOT NULL DEFAULT 0,
+    modified      TIMESTAMP,
+    user_modified INT,
+    created_user  INT,
+    created_time  TIMESTAMP
+
+);
+CREATE INDEX EM_jobtitle_index1 ON EM_jobtitle (locked);
 
 DROP TABLE IF EXISTS EM_user;
 CREATE TABLE EM_user
@@ -47,7 +78,7 @@ CREATE TABLE EM_user
     id                         INT AUTO_INCREMENT PRIMARY KEY,
     username                   CHAR(64)   NOT NULL,
     fullname                   CHAR(64)   NOT NULL,
-    locked                     TINYINT(1) NOT NULL,
+    locked                     TINYINT(1) NOT NULL DEFAULT 0,
     gender                     CHAR       NOT NULL,
     password                   CHAR(64)   NOT NULL,
     role_id                    INT        NOT NULL,
@@ -122,33 +153,38 @@ CREATE INDEX EM_user_job_index4 ON EM_user_job (status);
 DROP TABLE IF EXISTS EM_role;
 CREATE TABLE EM_role
 (
-    id   INT AUTO_INCREMENT PRIMARY KEY,
-    slug CHAR(32) NOT NULL,
-    name VARCHAR(64)
+    id       INT AUTO_INCREMENT PRIMARY KEY,
+    slug     CHAR(32) NOT NULL,
+    name     VARCHAR(64),
+    priority TINYINT(2)
 );
 
-INSERT INTO EM_role(id, slug, name)
-VALUES (1, 'admin', 'Administrator');
-INSERT INTO EM_role(id, slug, name)
-VALUES (2, 'master', 'Master');
-INSERT INTO EM_role(id, slug, name)
-VALUES (3, 'manager', 'Manager');
-INSERT INTO EM_role(id, slug, name)
-VALUES (4, 'leader', 'Leader');
-INSERT INTO EM_role(id, slug, name)
-VALUES (5, 'worker', 'Worker');
-INSERT INTO EM_role(id, slug, name)
-VALUES (6, 'accounttant', 'Accounttant');
+INSERT INTO EM_role(id, slug, name, priority)
+VALUES (1, 'admin', 'Administrator', 1);
+INSERT INTO EM_role(id, slug, name, priority)
+VALUES (2, 'master', 'Master', 2);
+INSERT INTO EM_role(id, slug, name, priority)
+VALUES (3, 'manager', 'Manager', 3);
+INSERT INTO EM_role(id, slug, name, priority)
+VALUES (4, 'leader', 'Leader', 4);
+INSERT INTO EM_role(id, slug, name, priority)
+VALUES (5, 'worker', 'Worker', 5);
+INSERT INTO EM_role(id, slug, name, priority)
+VALUES (6, 'accounttant', 'Accounttant', 6);
 CREATE INDEX EM_role_index1 ON EM_role (slug);
 
 
 DROP TABLE IF EXISTS EM_relationship;
 CREATE TABLE EM_relationship
 (
-    id       INT AUTO_INCREMENT PRIMARY KEY,
-    name     VARCHAR(128),
-    locked   TINYINT(1),
-    priority TINYINT(3)
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(128),
+    locked        TINYINT(1) NOT NULL DEFAULT 0,
+    priority      INT,
+    modified      TIMESTAMP,
+    user_modified INT,
+    created_user  INT,
+    created_time  TIMESTAMP
 );
 
 DROP TABLE IF EXISTS EM_dependent;
@@ -159,8 +195,11 @@ CREATE TABLE EM_dependent
     name            VARCHAR(64) NOT NULL,
     furigana        VARCHAR(64),
     birthday        DATE,
+    is_dependent    TINYINT(1)           DEFAULT 0,
     relationship_id INT         NOT NULL,
-    is_dependent    TINYINT(1)  NOT NULL,
+    locked          TINYINT(1)  NOT NULL DEFAULT 0,
+    modified        TIMESTAMP,
+    user_modified   INT,
     created_user    INT,
     created_time    TIMESTAMP
 );
@@ -174,6 +213,7 @@ CREATE TABLE EM_expense_document
     employee_id   INT          NOT NULL,
     path          VARCHAR(256) NOT NULL,
     content       TEXT,
+    locked        TINYINT(1) DEFAULT 0,
     modified      TIMESTAMP,
     user_modified INT,
     created_user  INT,
@@ -185,15 +225,78 @@ DROP TABLE IF EXISTS EM_time_record;
 CREATE TABLE EM_time_record
 (
     id            INT AUTO_INCREMENT PRIMARY KEY,
-    user_id       INT NOT NULL,
+    user_id       INT        NOT NULL,
     time_in       TIMESTAMP,
     time_out      TIMESTAMP,
-    lat           FLOAT,
-    lon           FLOAT,
-    status        TINYINT DEFAULT 0,
-    created_time  TIMESTAMP,
-    modified      TIMESTAMP,
-    user_modified INT
+    duration      INT,
+    overtime      INT,
+    coord_in      VARCHAR(64),
+    coord_out     VARCHAR(64),
+    distance_in   FLOAT,
+    distance_out  FLOAT,
+    approved      TINYINT(2)          DEFAULT 0,
+    locked        TINYINT(1) NOT NULL DEFAULT 0,
+    created_time  TIMESTAMP  NOT NULL,
+    modified      TIMESTAMP  NOT NULL,
+    created_user  INT        NOT NULL,
+    user_modified INT        NOT NULL
 );
 CREATE INDEX EM_time_record_index1 ON EM_time_record (user_id);
+CREATE INDEX EM_time_record_index2 ON EM_time_record (locked);
+CREATE INDEX EM_time_record_index3 ON EM_time_record (approved);
+CREATE INDEX EM_time_record_index4 ON EM_time_record (time_in);
+
+DROP TABLE IF EXISTS EM_workdays;
+CREATE TABLE EM_workdays
+(
+    id               INT AUTO_INCREMENT PRIMARY KEY,
+    month            INT        NOT NULL,
+    year             INT        NOT NULL,
+    workdays         FLOAT,
+    weekend_days     FLOAT,
+    national_holiday FLOAT,
+    locked           TINYINT(1) NOT NULL DEFAULT 0,
+    modified         TIMESTAMP,
+    user_modified    INT,
+    created_user     INT,
+    created_time     TIMESTAMP
+);
+CREATE INDEX EM_workdays_index1 ON EM_workdays (month);
+CREATE INDEX EM_workdays_index2 ON EM_workdays (year);
+
+
+DROP TABLE IF EXISTS EM_notification;
+CREATE TABLE EM_notification
+(
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    content       VARCHAR(1024),
+    locked        TINYINT(1) NOT NULL DEFAULT 0,
+    modified      TIMESTAMP,
+    user_modified INT,
+    created_user  INT,
+    created_time  TIMESTAMP
+);
+
+
+DROP TABLE IF EXISTS EM_holiday;
+CREATE TABLE EM_holiday
+(
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    user_id       INT        NOT NULL,
+    reason        VARCHAR(256),
+    date          DATE       NOT NULL,
+    locked        TINYINT(1) NOT NULL DEFAULT 0,
+    modified      TIMESTAMP,
+    user_modified INT,
+    created_user  INT,
+    created_time  TIMESTAMP,
+    approved      TINYINT,
+    approval_user INT,
+    approval_time TIMESTAMP
+);
+
+CREATE INDEX EM_holiday_index1 ON EM_holiday (user_id);
+CREATE INDEX EM_holiday_index2 ON EM_holiday (approved);
+CREATE INDEX EM_holiday_index3 ON EM_holiday (locked);
+
 

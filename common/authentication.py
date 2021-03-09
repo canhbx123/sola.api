@@ -46,7 +46,7 @@ def login_required_json(roles: list = None):
                 if log_kw:
                     kwargs['log'] = log
                 return func(*args, **kwargs)
-            return {'err': 1}
+            return {'err': 1, 'code': 403}
 
         return __fdecorated
 

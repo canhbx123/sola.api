@@ -8,7 +8,7 @@ from common.authentication import login_required_json, api_secret
 from setting import SMY
 
 
-class DepartmentView(FlaskView):
+class JobTitleView(FlaskView):
 
     @route('/list', methods=['POST'])
     @decorators.return_json
@@ -29,33 +29,32 @@ class DepartmentView(FlaskView):
             criterias.append('AND locked=0')
         elif tab == 'lock':
             criterias.append('AND locked=1')
-        return SqlGrid(conn=SMY(), query='SELECT *', fromdb='FROM EM_department', criterias=criterias, params=params).render()
+        return SqlGrid(conn=SMY(), query='SELECT *', fromdb='FROM EM_jobtitle', criterias=criterias, params=params).render()
 
     @route('/all', methods=['GET'])
     @decorators.return_json
     @login_required_json()
     @api_secret
     def all(self, log=None):
-        return SMY().query_table('SELECT * FROM EM_department WHERE locked=0')
+        return SMY().query_table('SELECT * FROM EM_jobtitle WHERE locked=0 ORDER BY priority ASC;')
 
     @route('/insert', methods=['POST'])
     @decorators.return_json
     @login_required_json()
     @api_secret
-    def insert(self, log=None):
+    def insert(self):
         name = request.json.get('name')
+        priority = request.json.get('priority')
         description = request.json.get('description')
         data = {
             'name': name,
             'locked': 0,
+            'priority': priority,
             'description': description,
-            'modified': datetime.now(),
-            'user_modified': log['id'],
-            'created_time': datetime.now(),
-            'created_user': log['id']
+            'modified': datetime.now()
         }
-        rs = SMY().insert(table='EM_department', data=data)
-        if rs:
+        rs = SMY().insert(table='EM_jobtitle', data=data)
+        if rs > 0:
             return {'err': 0}
         return {'err': 1}
 
@@ -63,14 +62,13 @@ class DepartmentView(FlaskView):
     @decorators.return_json
     @login_required_json()
     @api_secret
-    def remove(self, log=None):
-        department_id = request.json.get('id')
+    def remove(self):
+        object_id = request.json.get('id')
         data = {
             'locked': 1,
-            'modified': datetime.now(),
-            'user_modified': log['id']
+            'modified': datetime.now()
         }
-        rs = SMY().update(table='EM_department', data=data, where={'id': department_id})
+        rs = SMY().update(table='EM_jobtitle', data=data, where={'id': object_id})
         if rs:
             return {'err': 0}
         return {'err': 1}
@@ -79,16 +77,20 @@ class DepartmentView(FlaskView):
     @decorators.return_json
     @login_required_json(roles=['admin'])
     @api_secret
-    def update(self):
+    def update(self,log=None):
         name = request.json.get('name')
+        priority = request.json.get('priority')
+
         description = request.json.get('description')
         department_id = request.json.get('id')
         data = {
             'name': name,
+            'priority': priority,
             'description': description,
-            'modified': datetime.now()
+            'modified': datetime.now(),
+            'user_modified': log['id']
         }
-        rs = SMY().update(table='EM_department', data=data, where={'id': department_id})
+        rs = SMY().update(table='EM_jobtitle', data=data, where={'id': department_id})
         if rs:
             return {'err': 0}
         return {'err': 1}
@@ -103,7 +105,7 @@ class DepartmentView(FlaskView):
             'locked': 0,
             'modified': datetime.now()
         }
-        rs = SMY().update(table='EM_department', data=data, where={'id': department_id})
+        rs = SMY().update(table='EM_jobtitle', data=data, where={'id': department_id})
         if rs:
             return {'err': 0}
         return {'err': 1}

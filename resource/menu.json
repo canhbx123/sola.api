@@ -6,6 +6,7 @@
     "name": "home",
     "roles": [
       "admin",
+      "master",
       "manager",
       "leader",
       "worker"
@@ -13,12 +14,25 @@
     "show_sub": true
   },
   {
-    "title": "仕事",
-    "icon": "b-icon-hammer",
-    "path": "/jobs",
-    "name": "jobs",
+    "title": "Workdays",
+    "icon": "b-icon-alarm",
+    "path": "/workdays",
+    "name": "workdays_manager",
     "roles": [
       "admin",
+      "master",
+      "manager"
+    ],
+    "show_sub": false
+  },
+  {
+    "title": "作業過程",
+    "icon": "b-icon-hourglass-top",
+    "path": "/attendance-record",
+    "name": "attendance_record",
+    "roles": [
+      "admin",
+      "master",
       "manager",
       "leader",
       "worker"
@@ -26,15 +40,41 @@
     "show_sub": false
   },
   {
-    "title": "作業過程",
-    "icon": "b-icon-hourglass-top",
-    "path": "/working-process",
-    "name": "working_process",
+    "title": "Bill",
+    "icon": "b-icon-credit-card",
+    "path": "/expense",
+    "name": "expense",
     "roles": [
       "admin",
+      "master",
       "manager",
       "leader",
       "worker"
+    ],
+    "show_sub": false
+  },
+  {
+    "title": "Notification",
+    "icon": "b-icon-bell",
+    "path": "/notification",
+    "name": "notification",
+    "roles": [
+      "admin"
+    ],
+    "show_sub": false
+  },
+  {
+    "title": "Holiday",
+    "icon": "b-icon-hourglass",
+    "path": "/holiday",
+    "name": "holiday",
+    "roles": [
+      "admin",
+      "master",
+      "manager",
+      "leader",
+      "worker",
+      "accountant"
     ],
     "show_sub": false
   },
@@ -42,6 +82,7 @@
     "title": "ユーティリティ",
     "roles": [
       "admin",
+      "master",
       "manager",
       "leader",
       "worker"
@@ -56,6 +97,7 @@
         "name": "department",
         "roles": [
           "admin",
+          "master",
           "manager",
           "leader",
           "worker"
@@ -69,6 +111,7 @@
         "name": "user_manager",
         "roles": [
           "admin",
+          "master",
           "manager",
           "leader",
           "worker"
@@ -82,20 +125,27 @@
         "name": "company_manager",
         "roles": [
           "admin",
-          "manager",
-          "leader"
+          "master"
         ],
         "show_sub": false
       },
       {
         "title": "関係",
-        "icon": "b-icon-building",
+        "icon": "b-icon-people",
         "path": "/relationship",
         "name": "relationship_manager",
         "roles": [
-          "admin",
-          "manager",
-          "leader"
+          "admin"
+        ],
+        "show_sub": false
+      },
+      {
+        "title": "JobTitle",
+        "icon": "b-icon-filter-circle",
+        "path": "/jobtitle",
+        "name": "jobtitle_manager",
+        "roles": [
+          "admin"
         ],
         "show_sub": false
       },
@@ -105,9 +155,7 @@
         "path": "/location/manager",
         "name": "location_manager",
         "roles": [
-          "admin",
-          "manager",
-          "leader"
+          "admin"
         ],
         "show_sub": false
       }

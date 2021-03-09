@@ -24,14 +24,6 @@ class RelationshipView(FlaskView):
             criterias.append('AND locked=1')
         return SqlGrid(conn=SMY(), query='SELECT *', fromdb='FROM EM_relationship', criterias=criterias).render()
 
-    @route('/get-by-user-id', methods=['GET'])
-    @decorators.return_json
-    @login_required_json(roles=['admin'])
-    @api_secret
-    def get_by_user_id(self):
-        user_id = request.args.get('user_id', type=int)
-        return SMY().query_table('SELECT * FROM EM_dependent WHERE employee_id=:user_id', {'user_id': user_id})
-
     @route('/all', methods=['GET'])
     @decorators.return_json
     @login_required_json()
@@ -56,6 +48,25 @@ class RelationshipView(FlaskView):
             return {'err': 0}
         return {'err': 1}
 
+    @route('/update', methods=['POST'])
+    @decorators.return_json
+    @login_required_json(roles=['admin'])
+    @api_secret
+    def update(self, log=None):
+        name = request.json.get('name')
+        priority = request.json.get('priority')
+        department_id = request.json.get('id')
+        data = {
+            'name': name,
+            'priority': priority,
+            'modified': datetime.now(),
+            'user_modified': log['id']
+        }
+        rs = SMY().update(table='EM_relationship', data=data, where={'id': department_id})
+        if rs:
+            return {'err': 0}
+        return {'err': 1}
+
     @route('/remove', methods=['POST'])
     @decorators.return_json
     @login_required_json(roles=['admin'])
@@ -69,22 +80,6 @@ class RelationshipView(FlaskView):
         if rs:
             return {'err': 0}
         return {'err': 1}
-
-    @route('/update', methods=['POST'])
-    @decorators.return_json
-    @login_required_json(roles=['admin'])
-    @api_secret
-    def update(self, log=None):
-        data = request.json
-        employee_id = data.get('employee_id')
-        relationships = data.get('relationships')
-        SMY().delete(table='EM_dependent', where={'employee_id': employee_id})
-        for relationship in relationships:
-            relationship['employee_id'] = employee_id
-            relationship['created_user'] = log['id']
-            relationship['created_time'] = datetime.now()
-            SMY().insert(table='EM_dependent', data=relationship)
-        return {'err': 0}
 
     @route('/restore', methods=['POST'])
     @decorators.return_json

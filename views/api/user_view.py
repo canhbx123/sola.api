@@ -17,9 +17,9 @@ class UserView(FlaskView):
 
     @route('/list', methods=['POST'])
     @decorators.return_json
-    @login_required_json(roles=['admin'])
+    @login_required_json(roles=['admin', 'master', 'leader'])
     @api_secret
-    def list(self):
+    def list(self, log=None):
         grid = request.json
         tab = grid.get('tab')
         criterias = []
@@ -40,7 +40,11 @@ class UserView(FlaskView):
         if filters.get('department_id'):
             criterias.append('AND U.department_id=:department_id')
             params['department_id'] = filters['department_id']
-        return SqlGrid(conn=SMY(), query='SELECT *, (SELECT name FROM EM_role WHERE id=U.role_id) AS role,(SELECT name FROM EM_department WHERE id=U.department_id) AS department ',
+        if filters.get('commute_allowance', 0):
+            criterias.append('AND U.commute_allowance=:commute_allowance')
+            params['commute_allowance'] = filters['commute_allowance']
+        return SqlGrid(conn=SMY(),
+                       query='SELECT U.id, U.username, U.fullname, U.gender,U.role_id,U.furigana, U.birthday,U.zip,U.address,U.phone, U.email, U.bank_name, U.branch_name, U.account_type, U.account_number, U.my_number,U.pension_number,U.registration_date,U.insurance_insured_person,U.activeor_retirement_status,U.department_id,U.base_salary,U.commute_allowance,U.modified, U.user_modified,U.created_user,U.created_time,   (SELECT name FROM EM_role WHERE id=U.role_id) AS role,(SELECT name FROM EM_department WHERE id=U.department_id) AS department ',
                        fromdb='FROM EM_user U',
                        criterias=criterias, params=params).render()
 
@@ -107,7 +111,7 @@ class UserView(FlaskView):
         result = UserUtil.get_logged_info(user_id=user_id)
         if result:
             del result['password']
-            return {'err': 0, 'data': result}
+            return {'err': 0, 'data': result, 'server_time': datetime.now()}
 
     @route('/logout', methods=['GET'])
     @decorators.return_json
@@ -173,3 +177,50 @@ class UserView(FlaskView):
     def menu(self, log=None):
         role = log['role']
         return self.__process_menu(role=role)
+
+    @route('/count', methods=['GET'])
+    @decorators.return_json
+    @login_required_json()
+    @api_secret
+    def count(self):
+        total = SMY().query_scalar('SELECT COUNT(1) FROM EM_user WHERE locked=0')
+        return {'err': 0, "data": total}
+
+    @route('/all', methods=['GET'])
+    @decorators.return_json
+    @login_required_json()
+    @api_secret
+    def all(self):
+        result = SMY().query_table('SELECT id, fullname, role_id FROM EM_user WHERE locked=0')
+        return {'err': 0, "data": result}
+
+    @route('/remove', methods=['POST'])
+    @decorators.return_json
+    @login_required_json()
+    @api_secret
+    def remove(self, log=None):
+        department_id = request.json.get('id')
+        data = {
+            'locked': 1,
+            'modified': datetime.now(),
+            'user_modified': log['id']
+        }
+        rs = SMY().update(table='EM_user', data=data, where={'id': department_id})
+        if rs:
+            return {'err': 0}
+        return {'err': 1}
+
+    @route('/restore', methods=['POST'])
+    @decorators.return_json
+    @login_required_json(roles=['admin'])
+    def restore(self, log=None):
+        department_id = request.json.get('id')
+        data = {
+            'locked': 0,
+            'modified': datetime.now(),
+            'user_modified': log['id'],
+        }
+        rs = SMY().update(table='EM_user', data=data, where={'id': department_id})
+        if rs:
+            return {'err': 0}
+        return {'err': 1}

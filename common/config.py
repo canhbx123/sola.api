@@ -8,6 +8,8 @@ if os.environ.get('PRODUCTION'):
         'JSON_SORT_KEYS': False,
         'MAX_CONTENT_LENGTH': 100 * 1024 * 1024,
         'SECRET_KEY': 'BSRE^^^(@!!@JJDDKKFNND',
+        'RUN_DOMAIN': 'http://solajapan.xyz'
+
     }
     MYSQL_CONFIG = {
         'host': '127.0.0.1',
@@ -24,6 +26,8 @@ else:
         'JSON_SORT_KEYS': False,
         'MAX_CONTENT_LENGTH': 100 * 1024 * 1024,
         'SECRET_KEY': 'BSRE^^^(@!!@JJDDKKFNND',
+        'RUN_DOMAIN': 'http://127.0.0.1:5000'
+
     }
     MYSQL_CONFIG = {
         'host': '127.0.0.1',
